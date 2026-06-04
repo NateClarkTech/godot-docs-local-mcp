@@ -14,13 +14,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_GITHUB_USERNAME_HERE/godot-docs-mcp.git"
+    "url": "https://github.com/NateClarkTech/godot-docs-local-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_GITHUB_USERNAME_HERE/godot-docs-mcp/issues"
+    "url": "https://github.com/NateClarkTech/godot-docs-local-mcp/issues"
   },
-  "homepage": "https://github.com/YOUR_GITHUB_USERNAME_HERE/godot-docs-mcp#readme",
-  "author": "Your Name",
+  "homepage": "https://github.com/NateClarkTech/godot-docs-local-mcp#readme",
+  "author": "Nate Clark <nateclarktech@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": "^22.12.0"
