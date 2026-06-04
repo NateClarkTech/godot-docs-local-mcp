@@ -1,5 +1,5 @@
 {
-  "name": "godot-docs-mcp",
+  "name": "godot-docs-local-mcp",
   "version": "1.0.0",
   "description": "Local on-demand stdio MCP server for searching and retrieving Godot engine documentation. Supports stable/latest/4.6/4.5/4.4/4.3 with optional full offline content via local cache. On-demand (no pre-started server). Based on the original Cloudflare work by james2doyle.",
   "keywords": [
