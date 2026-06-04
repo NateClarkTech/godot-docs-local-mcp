@@ -1,0 +1,32 @@
+# Project-scoped MCP servers for godot-docs-mcp.
+# Loaded automatically by Grok Build when the current working directory
+# is inside this repository (or any subdirectory).
+#
+# Priority: ~/.grok/config.toml < <repo-root>/.grok/config.toml < <cwd>/.grok/config.toml
+#
+# This project registers the *local* stdio version of the Godot docs MCP
+# by default. When you are inside this repo, Grok Build will use a direct
+# Node process (via tsx) that starts on demand — no remote server, no rate
+# limits, full local control (and offline if you ran the download-docs script).
+#
+# The remote hosted version is available as an alternative (see the Advanced
+# section of the README) if you want zero local processes.
+#
+# To also have fully offline docs (no network for page content), run once:
+#   npm run download-docs latest
+#
+# See README.md for setup instructions for Grok, Claude, Cursor, and other clients.
+
+[mcp_servers.godot-docs]
+# Direct local stdio (recommended when working in this checkout).
+# Using the tsx binary directly (bypassing `npm run`) avoids stdout pollution
+# that breaks the MCP stdio handshake for some clients (e.g. "connection closed: initialize response").
+command = "./node_modules/.bin/tsx"
+args = ["src/stdio.ts"]
+enabled = true
+
+# Alternative: the public hosted instance (may be rate-limited or return
+# errors like 500 on handshake for some clients/transports).
+# [mcp_servers.godot-docs-hosted]
+# url = "https://godot-docs-mcp.j2d.workers.dev/mcp"
+# enabled = true

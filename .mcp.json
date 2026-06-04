@@ -1,0 +1,9 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema.json",
+  "mcpServers": {
+    "godot-docs": {
+      "command": "./node_modules/.bin/tsx",
+      "args": ["src/stdio.ts"]
+    }
+  }
+}

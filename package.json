@@ -1,0 +1,63 @@
+{
+  "name": "godot-docs-mcp",
+  "version": "1.0.0",
+  "description": "Local on-demand stdio MCP server for searching and retrieving Godot engine documentation. Supports stable/latest/4.6/4.5/4.4/4.3 with optional full offline content via local cache. On-demand (no pre-started server). Based on the original Cloudflare work by james2doyle.",
+  "keywords": [
+    "godot",
+    "mcp",
+    "documentation",
+    "ai",
+    "local",
+    "stdio",
+    "on-demand",
+    "offline"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_GITHUB_USERNAME_HERE/godot-docs-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_GITHUB_USERNAME_HERE/godot-docs-mcp/issues"
+  },
+  "homepage": "https://github.com/YOUR_GITHUB_USERNAME_HERE/godot-docs-mcp#readme",
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.12.0"
+  },
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "dev:inspect": "NODE_OPTIONS='--inspect' wrangler dev",
+    "dev:stdio": "tsx src/stdio.ts",
+    "download-docs": "tsx scripts/download-docs.ts",
+    "format": "biome format --write",
+    "lint:fix": "biome lint --fix",
+    "start": "wrangler dev",
+    "start:stdio": "tsx src/stdio.ts",
+    "cf-typegen": "wrangler types",
+    "test": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mixmark-io/domino": "^2.2.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "agents": "^0.5.1",
+    "minisearch": "^7.2.0",
+    "turndown": "^7.2.2",
+    "turndown-plugin-gfm": "^1.0.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.4",
+    "@cloudflare/vitest-pool-workers": "^0.12.14",
+    "@types/node": "^22.10.1",
+    "@types/turndown": "^5.0.6",
+    "node-addon-api": "^8.5.0",
+    "node-gyp": "^12.2.0",
+    "tsx": "^4.22.4",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.0",
+    "wrangler": "^4.67.0"
+  }
+}
