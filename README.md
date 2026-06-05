@@ -41,7 +41,8 @@ The committed `src/indexes/<version>/` directories provide the search metadata (
 1. Clone this repository to a permanent location on your machine.
 2. `cd godot-docs-mcp && npm install`
 3. (Strongly recommended for "latest" / dev builds or full offline) `npm run download-docs latest`
-4. Add the server to your AI client's MCP configuration (examples below). Use the **direct tsx binary** (after `npm install`) so there is no stdout pollution and the process starts cleanly on demand.
+4. (For global client configs such as `~/.grok/config.toml`) copy `.env.example` to `.env` (gitignored), edit `GODOT_DOCS_MCP_PATH` to point at this clone, and `source .env` (or use direnv for auto-load). This keeps your personal config portable instead of hard-coding absolute paths.
+5. Add the server to your AI client's MCP configuration (examples below). Use the **direct tsx binary** (after `npm install`) so there is no stdout pollution and the process starts cleanly on demand.
 
 The server is **on-demand by design**: configure it as a stdio server in your client and the client will automatically spawn the Node/tsx process only when it needs to call `search_docs` or `get_docs_page_for_term`. No manual `npm run dev` or background server is required.
 
@@ -62,25 +63,33 @@ This repo includes both a project `.grok/config.toml` **and** `.mcp.json` so the
 
 Global / manual example (add to `~/.grok/config.toml`):
 
-**Important:** For global configs, do **not** use a relative path like `"./node_modules/.bin/tsx"`. Grok resolves relative commands relative to the directory containing the config file (or Grok's own working dir), ignoring or applying `cwd` too late. This is why you saw it looking in `~/.grok/`.
+**Important:** For global configs (outside any project), do **not** use a relative path like `"./node_modules/.bin/tsx"`. Grok resolves relative commands (containing `./` etc.) relative to the directory of the config file or Grok's own working directory — **not** the `cwd` you specify below. This is why a relative command can end up looking in `~/.grok/` or similar.
 
-Use `npx` instead (npx is on PATH, and will honor `cwd` to find the local tsx):
+**Recommended:** Use an environment variable (Grok expands `${VAR}` and `${VAR:-default}` from your current environment when loading the config). Set it once in your shell profile (e.g. `~/.bashrc`, `~/.zshrc`, or via direnv). A `.env.example` is provided in this repo — copy it to `.env` (which is gitignored) and edit the path, then `source .env` or use direnv to auto-load when you `cd` into the clone.
+
+```sh
+export GODOT_DOCS_MCP_PATH="/absolute/path/to/your/local/clone/godot-docs-mcp"
+```
+
+Then in `~/.grok/config.toml`:
 
 ```toml
 [mcp_servers.godot-docs]
 command = "npx"
 args = ["tsx", "src/stdio.ts"]
-cwd = "/absolute/path/to/your/clone/godot-docs-mcp"
+cwd = "${GODOT_DOCS_MCP_PATH}"
 enabled = true
 ```
 
-(When inside the repo the project's own `.grok/config.toml` takes precedence and can safely use a relative path like `"./node_modules/.bin/tsx"` because Grok sets the working directory to the project root before resolving commands from project-scoped configs.)
+(When inside the repo the project's own `.grok/config.toml` takes precedence and can safely use a relative path like `"./node_modules/.bin/tsx"` because Grok sets the working directory to the project root before resolving commands from project-scoped configs. The path in your global `~/.grok/config.toml` must always point to *your* local install of the clone.)
 
-You can also use the CLI (run this from inside the godot-docs-mcp directory so relative paths resolve correctly, or use absolute paths):
+You can also use the CLI (run from inside the clone, or use the env var + absolute paths):
 
 ```sh
-grok mcp add godot-docs --command ./node_modules/.bin/tsx --args "src/stdio.ts" --cwd /path/to/godot-docs-mcp
+grok mcp add godot-docs --command npx --args "tsx,src/stdio.ts" --cwd "${GODOT_DOCS_MCP_PATH:-/path/to/your/clone/godot-docs-mcp}"
 ```
+
+(After setting `export GODOT_DOCS_MCP_PATH=...` as described above.)
 
 See the Grok documentation for the `/mcps` modal (refresh with `r` after editing configs) and `grok mcp doctor`.
 
@@ -124,7 +133,13 @@ Many clients also auto-discover a `.mcp.json` file in your workspace root (this 
 
 Any client that supports MCP stdio servers can use the same pattern. The key is pointing at the `tsx` binary (shipped in `node_modules/.bin` after `npm install`) + `src/stdio.ts`, preferably with the repo root as the working directory.
 
-Example command line for testing:
+**Recommended for portability:** Set the env var `GODOT_DOCS_MCP_PATH` (see Grok section above) and use:
+
+```bash
+npx tsx "${GODOT_DOCS_MCP_PATH:-/path/to/godot-docs-mcp}/src/stdio.ts"
+```
+
+Or with full paths:
 
 ```bash
 /path/to/godot-docs-mcp/node_modules/.bin/tsx /path/to/godot-docs-mcp/src/stdio.ts

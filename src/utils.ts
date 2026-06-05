@@ -21,11 +21,26 @@ type SearchIndexItem = {
 // --- Local documentation cache support ---
 // When files exist in local-docs/<version>/ they are preferred over network fetches.
 // Use `npm run download-docs latest` (or other version) to populate/refresh.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const LOCAL_DOCS_ROOT = path.resolve(__dirname, '..', '..', 'local-docs');
+// This is only for the local stdio/Node runtime. In the Cloudflare Workers
+// runtime (wrangler dev / deploy), import.meta.url may be undefined, so we
+// gracefully disable the local cache and always use network fetches.
+function getLocalDocsRoot(): string | null {
+  if (typeof import.meta === 'undefined' || typeof import.meta.url === 'undefined') {
+    return null;
+  }
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    return path.resolve(__dirname, '..', '..', 'local-docs');
+  } catch {
+    return null;
+  }
+}
 
-function getLocalDocPath(version: Version, relativeUrl: string): string {
+const LOCAL_DOCS_ROOT = getLocalDocsRoot();
+
+function getLocalDocPath(version: Version, relativeUrl: string): string | null {
+  if (!LOCAL_DOCS_ROOT) return null;
   // relativeUrl e.g. "/classes/class_node3d.html"
   const docPath = relativeUrl.replace(/^\//, '').replace(/\.html$/, '.md');
   return path.join(LOCAL_DOCS_ROOT, version, docPath);
@@ -41,6 +56,7 @@ function ensureDirForFile(filePath: string) {
 
 function saveLocalDoc(version: Version, relativeUrl: string, markdownContent: string) {
   const localPath = getLocalDocPath(version, relativeUrl);
+  if (!localPath) return;
   ensureDirForFile(localPath);
   try {
     writeFileSync(localPath, markdownContent, 'utf8');
@@ -52,15 +68,15 @@ function saveLocalDoc(version: Version, relativeUrl: string, markdownContent: st
 
 function loadLocalDoc(version: Version, relativeUrl: string): string | null {
   const localPath = getLocalDocPath(version, relativeUrl);
-  if (existsSync(localPath)) {
-    try {
-      return readFileSync(localPath, 'utf8');
-    } catch (e) {
-      console.error(`Failed to read local doc at ${localPath}:`, e);
-      return null;
-    }
+  if (!localPath || !existsSync(localPath)) {
+    return null;
   }
-  return null;
+  try {
+    return readFileSync(localPath, 'utf8');
+  } catch (e) {
+    console.error(`Failed to read local doc at ${localPath}:`, e);
+    return null;
+  }
 }
 
 /** Bucket of miniseaches for each version */

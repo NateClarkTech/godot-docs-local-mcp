@@ -16,6 +16,17 @@
 #   npm run download-docs latest
 #
 # See README.md for setup instructions for Grok, Claude, Cursor, and other clients.
+#
+# For your personal global ~/.grok/config.toml, use an environment variable
+# (Grok expands ${VAR} and ${VAR:-default} from your shell environment) so the
+# config stays portable across machines. See .env.example (copy to .env and edit).
+#   export GODOT_DOCS_MCP_PATH="/path/to/your/clone/godot-docs-mcp"
+# Then in ~/.grok/config.toml:
+#   command = "npx"
+#   args = ["tsx", "src/stdio.ts"]
+#   cwd = "${GODOT_DOCS_MCP_PATH}"
+# (The project's own .grok/config.toml uses relative paths safely because
+#  Grok chdirs to the project root for project-scoped configs.)
 
 [mcp_servers.godot-docs]
 # Direct local stdio (recommended when working in this checkout).
