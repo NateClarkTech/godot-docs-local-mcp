@@ -19,8 +19,11 @@
 
 [mcp_servers.godot-docs]
 # Direct local stdio (recommended when working in this checkout).
+# Relative path is safe here because this is a project-scoped config:
+# Grok sets the process working directory to the directory containing this
+# .grok/config.toml (i.e. the project root) before resolving the command.
 # Using the tsx binary directly (bypassing `npm run`) avoids stdout pollution
-# that breaks the MCP stdio handshake for some clients (e.g. "connection closed: initialize response").
+# that breaks the MCP stdio handshake for some clients.
 command = "./node_modules/.bin/tsx"
 args = ["src/stdio.ts"]
 enabled = true

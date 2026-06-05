@@ -62,17 +62,21 @@ This repo includes both a project `.grok/config.toml` **and** `.mcp.json` so the
 
 Global / manual example (add to `~/.grok/config.toml`):
 
+**Important:** For global configs, do **not** use a relative path like `"./node_modules/.bin/tsx"`. Grok resolves relative commands relative to the directory containing the config file (or Grok's own working dir), ignoring or applying `cwd` too late. This is why you saw it looking in `~/.grok/`.
+
+Use `npx` instead (npx is on PATH, and will honor `cwd` to find the local tsx):
+
 ```toml
 [mcp_servers.godot-docs]
-command = "./node_modules/.bin/tsx"
-args = ["src/stdio.ts"]
+command = "npx"
+args = ["tsx", "src/stdio.ts"]
 cwd = "/absolute/path/to/your/clone/godot-docs-mcp"
 enabled = true
 ```
 
-(When inside the repo the project's own `.grok/config.toml` takes precedence and does the same thing with a relative path.)
+(When inside the repo the project's own `.grok/config.toml` takes precedence and can safely use a relative path like `"./node_modules/.bin/tsx"` because Grok sets the working directory to the project root before resolving commands from project-scoped configs.)
 
-You can also use the CLI:
+You can also use the CLI (run this from inside the godot-docs-mcp directory so relative paths resolve correctly, or use absolute paths):
 
 ```sh
 grok mcp add godot-docs --command ./node_modules/.bin/tsx --args "src/stdio.ts" --cwd /path/to/godot-docs-mcp
