@@ -4,40 +4,37 @@
 #
 # Priority: ~/.grok/config.toml < <repo-root>/.grok/config.toml < <cwd>/.grok/config.toml
 #
-# This project registers the *local* stdio version of the Godot docs MCP
-# by default. When you are inside this repo, Grok Build will use a direct
-# Node process (via tsx) that starts on demand — no remote server, no rate
-# limits, full local control (and offline if you ran the download-docs script).
+# This is the recommended local on-demand stdio configuration.
+# It matches the style used in a typical personal global ~/.grok/config.toml
+# (see below and .env.example for how to set GODOT_DOCS_MCP_PATH).
+
+[mcp_servers.godot-docs]
+# Local on-demand stdio (recommended). Uses npx so it works cleanly from
+# global configs too. Set GODOT_DOCS_MCP_PATH in your environment (or use
+# the fallback) so this works whether loaded as project-scoped or global.
+command = "npx"
+args = ["tsx", "src/stdio.ts"]
+cwd = "${GODOT_DOCS_MCP_PATH:</path/to/your/clone/godot-docs-mcp>}"
+enabled = true
+
+# For your personal global ~/.grok/config.toml, copy the block above
+# and set the env var in your shell profile (or via .env + direnv):
+#   export GODOT_DOCS_MCP_PATH="/absolute/path/to/your/clone/godot-docs-mcp"
 #
-# The remote hosted version is available as an alternative (see the Advanced
-# section of the README) if you want zero local processes.
+# Then use (with fallback if the var isn't set):
+# [mcp_servers.godot-docs]
+# command = "npx"
+# args = ["tsx", "src/stdio.ts"]
+# cwd = "${GODOT_DOCS_MCP_PATH:-/path/to/your/clone/godot-docs-mcp}"
+# enabled = true
 #
+# The project's .grok/config.toml uses ${...:-.} so it works with cwd already
+# set by Grok when inside the repo.
+
 # To also have fully offline docs (no network for page content), run once:
 #   npm run download-docs latest
 #
 # See README.md for setup instructions for Grok, Claude, Cursor, and other clients.
-#
-# For your personal global ~/.grok/config.toml, use an environment variable
-# (Grok expands ${VAR} and ${VAR:-default} from your shell environment) so the
-# config stays portable across machines. See .env.example (copy to .env and edit).
-#   export GODOT_DOCS_MCP_PATH="/path/to/your/clone/godot-docs-mcp"
-# Then in ~/.grok/config.toml:
-#   command = "npx"
-#   args = ["tsx", "src/stdio.ts"]
-#   cwd = "${GODOT_DOCS_MCP_PATH}"
-# (The project's own .grok/config.toml uses relative paths safely because
-#  Grok chdirs to the project root for project-scoped configs.)
-
-[mcp_servers.godot-docs]
-# Direct local stdio (recommended when working in this checkout).
-# Relative path is safe here because this is a project-scoped config:
-# Grok sets the process working directory to the directory containing this
-# .grok/config.toml (i.e. the project root) before resolving the command.
-# Using the tsx binary directly (bypassing `npm run`) avoids stdout pollution
-# that breaks the MCP stdio handshake for some clients.
-command = "./node_modules/.bin/tsx"
-args = ["src/stdio.ts"]
-enabled = true
 
 # Alternative: the public hosted instance (may be rate-limited or return
 # errors like 500 on handshake for some clients/transports).
