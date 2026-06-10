@@ -11,7 +11,7 @@ Search Godot docs (titles + full page content) without needing to pre-start any 
 - Page content can be served from a local Markdown cache (populated by the download script) or fetched on-demand and auto-cached.
 - Supports `stable`, `latest`, `4.6`, `4.5`, `4.4`, and `4.3`. "latest" is ideal for dev builds.
 
-**Based on / adapted from the excellent original work at https://github.com/james2doyle/godot-docs-mcp (credit to James Doyle).** This version focuses on simple local stdio + on-demand usage + optional full-offline cache instead of (or in addition to) the Cloudflare-hosted remote path.
+**Based on / adapted from the excellent original work at https://github.com/james2doyle/godot-docs-local-mcp (credit to James Doyle).** This version focuses on simple local stdio + on-demand usage + optional full-offline cache instead of (or in addition to) the Cloudflare-hosted remote path.
 
 ## Supported Godot Documentation Versions
 
@@ -39,7 +39,7 @@ The committed `src/indexes/<version>/` directories provide the search metadata (
 ## Quick Start (Local On-Demand)
 
 1. Clone this repository to a permanent location on your machine.
-2. `cd godot-docs-mcp && npm install`
+2. `cd godot-docs-local-mcp && npm install`
 3. (Strongly recommended for "latest" / dev builds or full offline) `npm run download-docs latest`
 4. (For global client configs such as `~/.grok/config.toml`) copy `.env.example` to `.env` (gitignored), edit `GODOT_DOCS_MCP_PATH` to point at this clone, and `source .env` (or use direnv for auto-load). This keeps your personal config portable instead of hard-coding absolute paths.
 5. Add the server to your AI client's MCP configuration (examples below). Use the **direct tsx binary** (after `npm install`) so there is no stdout pollution and the process starts cleanly on demand.
@@ -68,7 +68,7 @@ Global / manual example (add to `~/.grok/config.toml`):
 **Recommended:** Use an environment variable (Grok expands `${VAR}` and `${VAR:-default}` from your current environment when loading the config). Set it once in your shell profile (e.g. `~/.bashrc`, `~/.zshrc`, or via direnv). A `.env.example` is provided in this repo — copy it to `.env` (which is gitignored) and edit the path, then `source .env` or use direnv to auto-load when you `cd` into the clone.
 
 ```sh
-export GODOT_DOCS_MCP_PATH="/absolute/path/to/your/local/clone/godot-docs-mcp"
+export GODOT_DOCS_MCP_PATH="/absolute/path/to/your/local/clone/godot-docs-local-mcp"
 ```
 
 Then in `~/.grok/config.toml`:
@@ -86,30 +86,64 @@ enabled = true
 You can also use the CLI (run from inside the clone, or use the env var + absolute paths):
 
 ```sh
-grok mcp add godot-docs --command npx --args "tsx,src/stdio.ts" --cwd "${GODOT_DOCS_MCP_PATH:-/path/to/your/clone/godot-docs-mcp}"
+grok mcp add godot-docs --command npx --args "tsx,src/stdio.ts" --cwd "${GODOT_DOCS_MCP_PATH:-/path/to/your/clone/godot-docs-local-mcp}"
 ```
 
 (After setting `export GODOT_DOCS_MCP_PATH=...` as described above.)
 
 See the Grok documentation for the `/mcps` modal (refresh with `r` after editing configs) and `grok mcp doctor`.
 
-### Claude Desktop (and similar)
+### Claude Code (CLI)
 
-Add to your `claude_desktop_config.json` (exact location depends on your OS):
+Run this once from any directory, substituting your actual clone path:
+
+```powershell
+claude mcp add --scope user --transport stdio godot-docs -- npm run dev:stdio --prefix  \path\to\your\clone\godot-docs-local-mcp
+```
+
+`--scope user` makes the server available across all your Claude Code sessions. Verify it registered with `claude mcp list`, then start a new session and run `/mcp` to confirm the tools are live.
+
+If `--prefix` doesn't resolve correctly on your system, the fallback:
+
+```powershell
+claude mcp add --scope user --transport stdio godot-docs -- cmd /c "cd \path\to\your\clone\godot-docs-local-mcp && npm run dev:stdio"
+```
+
+### Claude Desktop
+
+Config file location:
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+Add a `mcpServers` key at the top level. Use fully-qualified absolute paths to `tsx` and `stdio.ts` — do **not** use a relative path or rely on `cwd`, as Claude Desktop on Windows does not reliably honor the `cwd` field.
+
+**Windows** (use `.cmd` extension, backslash-escaped):
 
 ```json
 {
   "mcpServers": {
     "godot-docs": {
-      "command": "/absolute/path/to/godot-docs-mcp/node_modules/.bin/tsx",
-      "args": ["src/stdio.ts"],
-      "cwd": "/absolute/path/to/godot-docs-mcp"
+      "command": "C:\\absolute\\path\\to\\godot-docs-local-mcp\\node_modules\\.bin\\tsx.cmd",
+      "args": ["C:\\absolute\\path\\to\\godot-docs-local-mcp\\src\\stdio.ts"]
     }
   }
 }
 ```
 
-Use absolute paths for maximum compatibility. Restart Claude after editing.
+**macOS / Linux:**
+
+```json
+{
+  "mcpServers": {
+    "godot-docs": {
+      "command": "/absolute/path/to/godot-docs-local-mcp/node_modules/.bin/tsx",
+      "args": ["/absolute/path/to/godot-docs-local-mcp/src/stdio.ts"]
+    }
+  }
+}
+```
+
+Replace both path occurrences with your actual clone location. Restart Claude Desktop after saving.
 
 ### Cursor, Windsurf, Cline, Roo, and other MCP clients
 
@@ -119,9 +153,9 @@ Most modern agents support the standard stdio format:
 {
   "mcpServers": {
     "godot-docs": {
-      "command": "/absolute/path/to/godot-docs-mcp/node_modules/.bin/tsx",
+      "command": "/absolute/path/to/godot-docs-local-mcp/node_modules/.bin/tsx",
       "args": ["src/stdio.ts"],
-      "cwd": "/absolute/path/to/godot-docs-mcp"
+      "cwd": "/absolute/path/to/godot-docs-local-mcp"
     }
   }
 }
@@ -136,13 +170,13 @@ Any client that supports MCP stdio servers can use the same pattern. The key is 
 **Recommended for portability:** Set the env var `GODOT_DOCS_MCP_PATH` (see Grok section above) and use:
 
 ```bash
-npx tsx "${GODOT_DOCS_MCP_PATH:-/path/to/godot-docs-mcp}/src/stdio.ts"
+npx tsx "${GODOT_DOCS_MCP_PATH:-/path/to/godot-docs-local-mcp}/src/stdio.ts"
 ```
 
 Or with full paths:
 
 ```bash
-/path/to/godot-docs-mcp/node_modules/.bin/tsx /path/to/godot-docs-mcp/src/stdio.ts
+/path/to/godot-docs-mcp/node_modules/.bin/tsx /path/to/godot-docs-local-mcp/src/stdio.ts
 ```
 
 ## Fully Local / Offline Documentation (No Network for Content)
