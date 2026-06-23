@@ -1,0 +1,16 @@
+{
+  "name": "search_docs",
+  "description": "test",
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "searchTerm": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "searchTerm"
+    ]
+  }
+}

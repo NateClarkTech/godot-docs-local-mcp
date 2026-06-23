@@ -13,8 +13,7 @@
 # global configs too. Set GODOT_DOCS_MCP_PATH in your environment (or use
 # the fallback) so this works whether loaded as project-scoped or global.
 command = "npx"
-args = ["tsx", "src/stdio.ts"]
-cwd = "${GODOT_DOCS_MCP_PATH:</path/to/your/clone/godot-docs-mcp>}"
+args = ["tsx", "${GODOT_DOCS_MCP_PATH:-.}/src/stdio.ts"]
 enabled = true
 
 # For your personal global ~/.grok/config.toml, copy the block above
